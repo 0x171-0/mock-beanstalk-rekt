@@ -2,25 +2,9 @@ pragma solidity ^0.8.10;
 
 import {FlashLoanReceiverBase} from "./FlashLoanReceiverBase.sol";
 import {ILendingPool} from "./interfaces/ILendingPool.sol";
+import {IERC20} from "./interfaces/IERC20.sol";
 import {ILendingPoolAddressesProvider} from "./interfaces/ILendingPoolAddressesProvider.sol";
-import {TransferHelper} from "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "hardhat/console.sol";
-
-interface IERC20 {
-    function balanceOf(address) external view returns (uint256);
-
-    function transfer(address, uint256) external;
-
-    function approve(address, uint256) external;
-
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint);
-
-    function decimals() external view returns (uint8);
-}
+// import "hardhat/console.sol";
 
 interface IDiamondCut {
     enum FacetCutAction {
@@ -190,14 +174,10 @@ contract BIP18FlashLoanAttacker is FlashLoanReceiverBase, IUniswapV2Callee {
     IUniswapV2Router private constant uniswapV2Router =
         IUniswapV2Router(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     uint256 private constant UINT256_MAX = type(uint256).max;
-    ISwapRouter swapRouter;
 
     constructor(
-        ILendingPoolAddressesProvider provider,
-        ISwapRouter _swapRouter
-    ) FlashLoanReceiverBase(provider) {
-        swapRouter = _swapRouter;
-    }
+        ILendingPoolAddressesProvider provider
+    ) FlashLoanReceiverBase(provider) {}
 
     function executeOperation(
         address[] calldata assets,
