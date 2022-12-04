@@ -7,6 +7,29 @@ import {ILendingPoolAddressesProvider} from "./interfaces/ILendingPoolAddressesP
 
 // import "hardhat/console.sol";
 
+interface IDiamond {
+    struct FacetCut {
+        address facetAddress;
+        uint8 action;
+        bytes4[] functionSelectors;
+    }
+
+    receive() external payable;
+
+    fallback() external payable;
+
+    function depositBeans(uint256 amount) external;
+
+    function propose(
+        FacetCut[] calldata cut,
+        address _init,
+        bytes calldata _calldata,
+        uint8 _pauseOrUnpause
+    ) external;
+
+    function numberOfBips() external view returns (uint32);
+}
+
 interface IDiamondCut {
     enum FacetCutAction {
         Add,
@@ -85,6 +108,13 @@ interface IUniswapV2Router {
         address to,
         uint deadline
     ) external returns (uint amountToken, uint amountETH);
+
+    function swapExactETHForTokens(
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external payable returns (uint[] memory amounts);
 }
 
 interface ICurvePool is IERC20 {
