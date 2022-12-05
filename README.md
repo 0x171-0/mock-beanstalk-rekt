@@ -17,7 +17,10 @@ npm run build:types
 npm run test
 
 ```
+- Built base on:[JIAMING-LI/BeanstalkProtocolExploit](https://github.com/JIAMING-LI/BeanstalkProtocolExploit)
+
 ---
+
 # Case Study
 
 # ****前言****
@@ -478,4 +481,4 @@ flowchart
 
 [Beanstalk Farm 攻擊事件分析](https://0xzx.com/zh-tw/2022041811312238858.html)
 
-[https://github.com/JIAMING-LI/BeanstalkProtocolExploit](https://github.com/JIAMING-LI/BeanstalkProtocolExploit)
+[JIAMING-LI](https://github.com/JIAMING-LI/BeanstalkProtocolExploit)
